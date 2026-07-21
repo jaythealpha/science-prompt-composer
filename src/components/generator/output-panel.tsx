@@ -3,11 +3,13 @@
 import * as React from "react";
 import {
   AlertTriangle,
+  ArrowUpRight,
   Atom,
   Ban,
   Download,
   FileJson,
   FileText,
+  Info,
   Layers,
   Lightbulb,
   ListTree,
@@ -15,6 +17,7 @@ import {
   RefreshCw,
   Save,
   ScrollText,
+  Sparkles,
   Tag,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +36,7 @@ import {
   slugifyForFile,
 } from "@/lib/export";
 import type { GenerationResult, GenerationSettings } from "@/lib/types";
+import { getPhenomenonBySlug, PHENOMENA } from "@/lib/phenomena";
 
 interface OutputPanelProps {
   input: string;
@@ -40,23 +44,69 @@ interface OutputPanelProps {
   result: GenerationResult | null;
   onRegenerate: () => void;
   onSave: () => void;
+  onOpenSlug: (slug: string) => void;
   saved: boolean;
   isGenerating: boolean;
 }
 
 function CategoryBadge({ result }: { result: GenerationResult }) {
   const { lang } = useLanguage();
+  const curated = result.matchConfidence === "profile";
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Badge variant="accent" className="gap-1">
         <Atom className="h-3 w-3" aria-hidden="true" />
         {t(UI.output.detected, lang)}: {t(UI.category[result.detectedCategory], lang)}
       </Badge>
-      {result.matchConfidence === "fallback" && (
-        <Badge variant="warning" className="gap-1">
-          <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-          {t(UI.output.fallbackNote, lang)}
-        </Badge>
+      <Badge variant={curated ? "default" : "outline"} className="gap-1">
+        {curated ? (
+          <Sparkles className="h-3 w-3" aria-hidden="true" />
+        ) : (
+          <Info className="h-3 w-3" aria-hidden="true" />
+        )}
+        {curated ? t(UI.output.curated, lang) : t(UI.output.generalTemplate, lang)}
+      </Badge>
+    </div>
+  );
+}
+
+function GeneralTemplateNote({
+  result,
+  onOpenSlug,
+}: {
+  result: GenerationResult;
+  onOpenSlug: (slug: string) => void;
+}) {
+  const { lang } = useLanguage();
+  const related = result.relatedSlugs
+    .map((slug) => getPhenomenonBySlug(slug))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
+
+  return (
+    <div className="rounded-xl border border-border bg-secondary/40 p-4">
+      <p className="flex items-start gap-2 text-sm leading-relaxed text-muted-foreground">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+        <span>{t(UI.output.fallbackNote, lang)}</span>
+      </p>
+      {related.length > 0 && (
+        <div className="mt-3.5">
+          <div className="mb-2 text-xs font-medium text-foreground">
+            {t(UI.output.relatedTitle, lang)}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {related.map((p) => (
+              <button
+                key={p.slug}
+                type="button"
+                onClick={() => onOpenSlug(p.slug)}
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-background/70 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+              >
+                {t(p.title, lang)}
+                <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -92,6 +142,9 @@ function EmptyState() {
             </span>
           ))}
         </div>
+        <p className="max-w-md text-balance text-xs leading-relaxed text-muted-foreground/80">
+          {t(UI.output.coverage, lang).replace("{n}", String(PHENOMENA.length))}
+        </p>
       </CardContent>
     </Card>
   );
@@ -122,6 +175,7 @@ export function OutputPanel({
   result,
   onRegenerate,
   onSave,
+  onOpenSlug,
   saved,
   isGenerating,
 }: OutputPanelProps) {
@@ -210,6 +264,10 @@ export function OutputPanel({
         <h2 className="text-xl font-semibold tracking-tight">{result.title}</h2>
         <CategoryBadge result={result} />
       </div>
+
+      {result.matchConfidence === "fallback" && (
+        <GeneralTemplateNote result={result} onOpenSlug={onOpenSlug} />
+      )}
 
       <Tabs defaultValue="overview" className="spc-fade-up">
         <TabsList className="flex w-full flex-wrap">

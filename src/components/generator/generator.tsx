@@ -145,6 +145,20 @@ export function Generator() {
     [setLang],
   );
 
+  const handleOpenSlug = React.useCallback(
+    (slug: string) => {
+      const profile = getPhenomenonBySlug(slug);
+      if (!profile) return;
+      const example = t(profile.exampleInput, lang);
+      setInput(example);
+      runGeneration(example, settings);
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    },
+    [lang, settings, runGeneration],
+  );
+
   const handleToggleFavorite = React.useCallback((id: string) => {
     setHistory(toggleFavorite(id));
   }, []);
@@ -181,6 +195,7 @@ export function Generator() {
               result={result}
               onRegenerate={handleRegenerate}
               onSave={handleSave}
+              onOpenSlug={handleOpenSlug}
               saved={saved}
               isGenerating={isGenerating}
             />

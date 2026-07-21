@@ -19,6 +19,8 @@ export const generationResultSchema = z.object({
   detectedCategory: z.enum(["physics", "chemistry", "biology", "earth", "space"]),
   matchedSlug: z.string().nullable(),
   matchConfidence: z.enum(["profile", "fallback"]),
+  // Optional with a default so history saved before this field existed still validates.
+  relatedSlugs: z.array(z.string()).optional().default([]),
   overview: z.string(),
   cause: z.string(),
   mechanism: z.string(),

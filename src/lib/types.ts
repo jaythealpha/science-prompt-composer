@@ -77,6 +77,7 @@ export interface GenerationResult {
   detectedCategory: ScienceCategory;
   matchedSlug: string | null;
   matchConfidence: "profile" | "fallback";
+  relatedSlugs: string[];
   overview: string;
   cause: string;
   mechanism: string;

@@ -92,9 +92,14 @@ function detectScale(normalized: string): VisualScale {
 function cleanTopicTitle(input: string): string {
   const trimmed = input.trim().replace(/\s+/g, " ").replace(/[?.!？。！]+$/, "");
   const stripped = trimmed
+    // English request framing
     .replace(/^(explain|visualize|show|describe|illustrate)\s+(how|the|a|an)?\s*/i, "")
     .replace(/^(how\s+(does|do|is|are)|what\s+(is|are)|why\s+(does|do|is|are))\s+/i, "")
     .replace(/\s+(forms?|works?|happens?|occurs?|forming|working)$/i, "")
+    // Korean trailing request verbs ("~설명해줘", "~보여줘" …)
+    .replace(/[은는이가을를]?\s*(?:어떻게\s*)?(?:설명해줘|설명해|보여줘|시각화해줘|알려줘)$/, "")
+    // Japanese trailing request verbs ("~説明して", "~示して" …)
+    .replace(/(?:が|を|について)?(?:どのように[^。]*?か)?(?:説明して|教えて|可視化して|視覚化して|示して)$/, "")
     .trim();
   const base = stripped.length > 0 ? stripped : trimmed;
   return base.charAt(0).toUpperCase() + base.slice(1);
@@ -416,6 +421,18 @@ function buildInfographicPrompt(
   ].join("\n");
 }
 
+function relatedCuratedSlugs(category: ScienceCategory, excludeSlug: string | null): string[] {
+  const sameCategory = PHENOMENA.filter(
+    (p) => p.category === category && p.slug !== excludeSlug,
+  ).map((p) => p.slug);
+  // Backfill with other curated topics if the category is thin, so we always
+  // offer a few in-depth suggestions.
+  const others = PHENOMENA.filter(
+    (p) => p.category !== category && p.slug !== excludeSlug,
+  ).map((p) => p.slug);
+  return [...sameCategory, ...others].slice(0, 3);
+}
+
 function buildExplanationParagraph(profile: PhenomenonProfile, lang: Language): string {
   return [
     pick(profile.shortExplanation, lang),
@@ -444,6 +461,9 @@ export class LocalGenerationService implements GenerationService {
 
     const profile = matched ?? buildFallbackProfile(input || "this phenomenon", detectedCategory, scale);
 
+    // Nearest curated topics to guide the user toward in-depth coverage.
+    const relatedSlugs = relatedCuratedSlugs(detectedCategory, matched ? matched.slug : null);
+
     const count = densityCount(settings.labelDensity);
 
     const visualElements = profile.visualElements.map((v) => pick(v, lang));
@@ -458,6 +478,7 @@ export class LocalGenerationService implements GenerationService {
       detectedCategory,
       matchedSlug: matched ? matched.slug : null,
       matchConfidence: matched ? "profile" : "fallback",
+      relatedSlugs,
       overview: pick(profile.shortExplanation, lang),
       cause: pick(profile.cause, lang),
       mechanism: pick(profile.mechanism, lang),

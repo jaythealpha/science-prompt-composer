@@ -120,10 +120,22 @@ export const UI = {
     infographicPrompt: { en: "Advanced infographic prompt", ko: "고급 인포그래픽 프롬프트", ja: "詳細インフォグラフィックプロンプト" },
     cautions: { en: "Scientific caution", ko: "과학적 유의사항", ja: "科学的な注意点" },
     detected: { en: "Detected category", ko: "감지된 분류", ja: "判定された分野" },
+    curated: { en: "Curated profile", ko: "큐레이션 프로필", ja: "厳選プロファイル" },
+    generalTemplate: { en: "General template", ko: "일반 템플릿", ja: "汎用テンプレート" },
     fallbackNote: {
-      en: "No exact match found — generated from a generic template. Verify the scientific details.",
-      ko: "정확히 일치하는 항목이 없어 일반 템플릿으로 생성했습니다. 과학적 세부사항을 확인하세요.",
-      ja: "完全に一致する項目がないため汎用テンプレートで生成しました。科学的な詳細を確認してください。",
+      en: "This topic isn't in the curated library yet, so it's built from a general template. It's a solid starting point — double-check the scientific details.",
+      ko: "이 주제는 아직 큐레이션 라이브러리에 없어 일반 템플릿으로 구성했습니다. 좋은 출발점이지만 과학적 세부사항을 한 번 더 확인하세요.",
+      ja: "この現象はまだ厳選ライブラリに含まれていないため、汎用テンプレートで構成しています。良い出発点ですが、科学的な詳細をもう一度確認してください。",
+    },
+    relatedTitle: {
+      en: "In-depth topics you can open instead",
+      ko: "대신 열어볼 수 있는 심층 주제",
+      ja: "代わりに開ける詳細な現象",
+    },
+    coverage: {
+      en: "In-depth profiles for {n} core phenomena — plus a general template for anything else.",
+      ko: "핵심 현상 {n}가지는 심층 프로필로, 그 외 주제는 일반 템플릿으로 다룹니다.",
+      ja: "主要な{n}件の現象は詳細プロファイルで、それ以外は汎用テンプレートで対応します。",
     },
   },
   actions: {
