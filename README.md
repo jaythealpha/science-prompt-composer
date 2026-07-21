@@ -1,73 +1,45 @@
 # Science Prompt Composer
 
-Turn complex science into visual prompts. Describe a scientific phenomenon in plain language and generate an educational explanation, a visual annotation plan, suggested labels, and production-ready image-generation prompts — in English or Korean.
+Convert plain-language descriptions of scientific phenomena into high-quality, structured prompts for AI image generation — complete with explanations, labels, and annotation plans. Runs entirely in the browser with a local rule/template engine (no account, database, or paid API required).
 
-Built with Next.js (App Router), TypeScript, Tailwind CSS, shadcn-style components, Radix UI, Lucide, and Zod. The MVP runs entirely in the browser with a local rule/template-based generation engine — no authentication, database, or paid API required.
+**Live:** https://science-prompt-composer.vercel.app
+
+Built with Next.js (App Router), TypeScript, Tailwind CSS, shadcn-style components, Radix UI, Lucide, and Zod.
 
 ## Features
 
-- **16 strongly typed phenomenon profiles** (aurora, nuclear fission, lightning, plate tectonics, greenhouse effect, photosynthesis, osmosis, electrolysis, DNA replication, mitosis, superconductivity, black hole accretion, volcanic eruption, electromagnetic induction, combustion, chemical bonds) plus a generic fallback for unknown inputs
-- **Structured outputs**: overview, cause/mechanism/result, visualization strategy, core visual elements, labels, annotations, final structured image prompt, negative prompt, simplified prompt, and an advanced infographic prompt
-- **Controls**: category (auto-detect), visualization style, aspect ratio, complexity, label density, output language, and per-section toggles
-- **English and Korean** UI and output
-- **Local history and favorites** (latest 20 entries in `localStorage`, resilient to corrupted data)
-- **Copy and export**: per-section copy, copy all, TXT / Markdown / JSON export
-- **Dark and light themes**, responsive layout (375px+), keyboard-accessible controls
+- 16 built-in phenomenon profiles (aurora, nuclear fission, lightning, plate tectonics, photosynthesis, osmosis, electrolysis, DNA replication, mitosis, superconductivity, black hole accretion, volcanic eruption, and more), plus a generic fallback for unknown inputs
+- Structured output: overview, cause/mechanism/result, visualization strategy, visual elements, labels, final image prompt, negative prompt, simplified prompt, and advanced infographic prompt
+- **Trilingual** UI and output: English (default), Korean, Japanese — switch from the header language menu
+- Controls: category, style, aspect ratio, complexity, label density, and per-section toggles
+- Local history (last 20), favorites, copy, and export to TXT / Markdown / JSON
+- Dark/light themes, responsive layout, keyboard accessible
+
+## Generation layer
+
+`src/lib/generation/local-service.ts` implements a `GenerationService` interface. The current implementation is local and rule/template-based; an LLM-backed implementation can be swapped in later behind the same interface without changing the UI.
 
 ## Local setup
 
-1. Install [Node.js](https://nodejs.org) (v18.18 or newer; v20+ recommended)
-2. Run `npm install`
-3. Run `npm run dev`
-4. Open http://localhost:3000
+1. Install Node.js 18+
+2. `npm install`
+3. `npm run dev`
+4. Open the printed local address (default http://localhost:3000)
 
-No environment variables are required for local generation mode. `NEXT_PUBLIC_APP_NAME` is optional and only overrides the app name in page metadata. See `.env.example` for the full list of reserved variables.
+Scripts: `npm run dev`, `npm run build`, `npm run start`, `npm run lint`, `npm run typecheck`.
 
-### Scripts
+## Deployment (automatic)
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the development server |
-| `npm run build` | Production build |
-| `npm run start` | Serve the production build |
-| `npm run lint` | ESLint |
-| `npm run typecheck` | TypeScript check (`tsc --noEmit`) |
+The project is connected to GitHub for continuous deployment — every push to `main` builds and deploys to Vercel automatically. To deploy manually instead: import the GitHub repo in Vercel, confirm Next.js detection, optionally add env vars from `.env.example`, and deploy.
 
-## GitHub
+## Environment variables
 
-1. Create a repository on GitHub
-2. Commit the files:
-   ```bash
-   git init
-   git add .
-   git commit -m "Science Prompt Composer"
-   ```
-3. Push to GitHub:
-   ```bash
-   git remote add origin <your-repo-url>
-   git push -u origin main
-   ```
+No environment variable is required for local generation mode. See `.env.example`:
 
-## Vercel deployment
+- `NEXT_PUBLIC_APP_NAME` — optional app name shown in metadata
+- `GENERATION_MODE` — `local` (default); `openai`/`anthropic` reserved for a future LLM backend
+- `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` — only needed if an LLM backend is enabled
 
-1. Sign in to [Vercel](https://vercel.com)
-2. Import the GitHub repository
-3. Confirm that Vercel detects the **Next.js** framework (no custom build settings needed)
-4. (Optional) Add environment variables from `.env.example` — none are required for local generation mode
-5. Deploy
-6. Verify the production URL
+## Note on generated images
 
-## Architecture notes
-
-- `src/lib/types.ts` — shared types, including the `GenerationService` interface
-- `src/lib/phenomena.ts` — the typed, bilingual phenomenon profile database
-- `src/lib/generation/local-service.ts` — `LocalGenerationService`, the rule/template engine (input normalization, alias matching, category and scale detection, prompt building). To integrate an LLM later, implement `GenerationService` with an API-backed class and swap the export — the UI does not need to change.
-- `src/lib/storage.ts` — defensive `localStorage` history/favorites (Zod-validated)
-- `src/lib/export.ts` — TXT / Markdown / JSON builders and file download
-- `src/components/generator/*` — input panel, output panel, loading stages, history
-
-## Known limitations
-
-- The local engine is template-based: unknown phenomena get a structured generic scaffold, not researched science content
-- AI image generators render text imperfectly — plan to correct labels in design software
-- Always verify scientific accuracy before publishing or teaching with generated content
+AI image generators render these prompts well but do not reproduce text labels perfectly — Latin-script labels are usually accurate, while CJK (Korean/Japanese) labels are less reliable. Verify scientific accuracy and correct any image-generated label text in design software (Figma, Illustrator, Photoshop) for final deliverables.
