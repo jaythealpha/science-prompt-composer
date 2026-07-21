@@ -26,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CopyButton } from "@/components/copy-button";
 import { OutputSection, PromptBlock } from "./output-section";
+import { VideoPanel } from "./video-panel";
 import { useLanguage } from "@/components/providers";
 import { UI, t } from "@/lib/i18n";
 import {
@@ -283,6 +284,9 @@ export function OutputPanel({
           <TabsTrigger value="simplified" className="flex-1">
             {t(UI.tabs.simplified, lang)}
           </TabsTrigger>
+          <TabsTrigger value="video" className="flex-1">
+            {t(UI.tabs.video, lang)}
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview */}
@@ -442,6 +446,11 @@ export function OutputPanel({
               {t(UI.actions.exportMd, lang)}
             </Button>
           </div>
+        </TabsContent>
+
+        {/* Video */}
+        <TabsContent value="video">
+          <VideoPanel input={input} result={result} settings={settings} />
         </TabsContent>
       </Tabs>
     </div>
